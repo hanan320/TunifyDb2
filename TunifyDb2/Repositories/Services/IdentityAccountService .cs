@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using TunifyDb2.Data;
 using TunifyDb2.Models;
 using TunifyDb2.Models.DTO;
-using TunifyDb2.Repositories.Interfaces;
 using TunifyPlatform.Repositories.Interfaces;
 
 
