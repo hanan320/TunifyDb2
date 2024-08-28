@@ -9,5 +9,6 @@ namespace TunifyDb2.Repositories.Interfaces
         Task<List<Artists>> GetAllArtists();
         Task<Artists> UpdateArtists(int id, Artists artist);
         Task DeleteArtists(int id);
+        Task AddSongToArtist(int artistId, int songId);
     }
 }

@@ -46,5 +46,42 @@ namespace TunifyDb2.Repositories.Services
             await _context.SaveChangesAsync();
             return playList;
         }
+        public async Task AddSongToPlaylist(int playlistId, int songId)
+        {
+            var playlist = await _context.playlists
+                .Include(p => p.PlaylistSongs)
+                .FirstOrDefaultAsync(x => x.PlaylistsId == playlistId);
+
+            if (playlist == null)
+            {
+                throw new Exception("Playlist not found");
+            }
+
+            var song = await _context.songs.FindAsync(songId);
+            if (song == null)
+            {
+                throw new Exception("Song not found");
+            }
+
+            if (playlist.PlaylistSongs == null)
+            {
+                playlist.PlaylistSongs = new List<PlaylistSongs>();
+            }
+
+            // Check if the song is already in the playlist
+            if (playlist.PlaylistSongs.Any(ps => ps.Song_Id == songId))
+            {
+                throw new Exception("Song is already in the playlist");
+            }
+
+            playlist.PlaylistSongs.Add(new PlaylistSongs
+            {
+                Playlist_Id = playlistId,
+                Song_Id = songId
+            });
+
+            _context.Entry(playlist).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
     }
 }
