@@ -134,3 +134,40 @@ Swagger UI is included in the TunifyPlatform project to offer easy-to-use, inter
 
 2. **Open Swagger UI**: Once running, open a web browser and go to:  
    `http://localhost:{PORT}/TunifySwagger`
+
+## Accessing Swagger UI
+Once the application is running, open your web browser and go to: `http://localhost:{PORT}/TunifySwagger`
+
+## Setting Up Authentication with Identity
+ASP.NET Core Identity is integrated into TunifyPlatform to manage user authentication, including:
+
+- **Register:** New users can sign up with a username, email, and password using `RegisterDto`.
+- **Login:** Users can log in with `LoginDto`.
+- **Logout:** Users can log out, ending their session.
+
+### How to Use:
+- **Register:** Go to `/Account/Register` to create a new account.
+- **Login:** Go to `/Account/Login` to sign in.
+- **Logout:** Go to `/Account/Logout` to sign out.
+
+Handle errors properly and consider logging them for troubleshooting.
+
+## JWT Authentication and Authorization
+TunifyPlatform now uses JWT for secure authentication and authorization:
+
+- **Repository and Services:**
+  - **IAccount Interface:** Updated to include JWT token generation.
+  - **IdentityAccountService:** Generates JWT tokens.
+  - **JwtTokenService:** Manages token creation, validation, and claims.
+
+- **AccountController:**
+  - **Login:** Now returns a JWT token with user roles and claims after successful login.
+
+## Securing API Endpoints
+- **Authorization:** Secured specific API endpoints with `[Authorize]` attributes and role-based access.
+
+- **Roles and Claims:** 
+  - Set up in authorization policies.
+  - Roles and users are seeded into the database with the necessary claims.
+
+This setup ensures secure user authentication and role-based access control in TunifyPlatform.
