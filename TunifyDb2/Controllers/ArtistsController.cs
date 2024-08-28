@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TunifyDb2.Data;
 using TunifyDb2.Models;
+using TunifyDb2.Repositories.Interfaces;
 
 namespace TunifyDb2.Controllers
 {
@@ -14,111 +15,75 @@ namespace TunifyDb2.Controllers
     [ApiController]
     public class ArtistsController : ControllerBase
     {
-        private readonly TunifyDbContext _context;
+        private readonly IArtists _artists;
 
-        public ArtistsController(TunifyDbContext context)
+        public ArtistsController(IArtists context)
         {
-            _context = context;
+            _artists = context;
         }
 
         // GET: api/Artists
+        [Route("/artist/GetAllArtists")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Artists>>> Getartists()
+        public async Task<ActionResult<IEnumerable<Artists>>> GetArtists()
         {
-          if (_context.artists == null)
-          {
-              return NotFound();
-          }
-            return await _context.artists.ToListAsync();
+            var artists = await _artists.GetAllArtists();
+            return Ok(artists);
         }
 
         // GET: api/Artists/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Artists>> GetArtists(int id)
+        public async Task<ActionResult<Artists>> GetArtist(int id)
         {
-          if (_context.artists == null)
-          {
-              return NotFound();
-          }
-            var artists = await _context.artists.FindAsync(id);
+            var artist = await _artists.GetArtistById(id);
 
-            if (artists == null)
+            if (artist == null)
             {
-                return NotFound();
+                return NotFound($"Artist [{id}] not found.");
             }
 
-            return artists;
+            return Ok(artist);
         }
 
         // PUT: api/Artists/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutArtists(int id, Artists artists)
+        public async Task<IActionResult> PutArtist(int id, Artists artist)
         {
-            if (id != artists.ArtistsId)
+            var updatedArtist = await _artists.UpdateArtists(id, artist);
+
+            if (updatedArtist == null)
             {
-                return BadRequest();
+                return NotFound($"Artist [{id}] not found.");
             }
 
-            _context.Entry(artists).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ArtistsExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(updatedArtist);
         }
 
         // POST: api/Artists
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Artists>> PostArtists(Artists artists)
+        public async Task<ActionResult<Artists>> PostArtist(Artists artist)
         {
-          if (_context.artists == null)
-          {
-              return Problem("Entity set 'TunifyDbContext.artists'  is null.");
-          }
-            _context.artists.Add(artists);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetArtists", new { id = artists.ArtistsId }, artists);
+            var newArtist = await _artists.CreateArtist(artist);
+            return Ok(newArtist);
         }
 
         // DELETE: api/Artists/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteArtists(int id)
+        public async Task<IActionResult> DeleteArtist(int id)
         {
-            if (_context.artists == null)
+            var artist = await _artists.GetArtistById(id);
+
+            if (artist == null)
             {
-                return NotFound();
-            }
-            var artists = await _context.artists.FindAsync(id);
-            if (artists == null)
-            {
-                return NotFound();
+                return NotFound($"Artist [{id}] not found.");
             }
 
-            _context.artists.Remove(artists);
-            await _context.SaveChangesAsync();
-
+            await _artists.DeleteArtists(id);
             return NoContent();
         }
 
-        private bool ArtistsExists(int id)
-        {
-            return (_context.artists?.Any(e => e.ArtistsId == id)).GetValueOrDefault();
-        }
+        
     }
 }
