@@ -1,9 +1,15 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using TunifyDb2.Data;
+using TunifyDb2.Models;
 using TunifyDb2.Repositories.Interfaces;
 using TunifyDb2.Repositories.Services;
+using TunifyPlatform.Repositories.Interfaces;
+using TunifyPlatform.Repositories.Services;
 
-namespace TunifyDb2
+
+namespace TunifyPlatform
 {
     public class Program
     {
@@ -14,13 +20,20 @@ namespace TunifyDb2
 
             var ConnectionStringVar = builder.Configuration.GetConnectionString("DefaultConnection");
 
+            // Identity configuration
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<TunifyDbContext>();
+
             builder.Services.AddDbContext<TunifyDbContext>(optionsX => optionsX.UseSqlServer(ConnectionStringVar));
             builder.Services.AddTransient<IUser, UserServices>();
             builder.Services.AddTransient<ISong, SongServices>();
             builder.Services.AddTransient<IPlayList, PlaylistsServices>();
-            builder.Services.AddTransient<IArtists, ArtistsServices>();
+            builder.Services.AddTransient<IArtists,ArtistsServices>();
 
-           
+            builder.Services.AddTransient<IAccounts, IdentityAccountService>();
+
+
+            //swager configration 
             builder.Services.AddSwaggerGen(
                 option =>
                 {
@@ -34,7 +47,10 @@ namespace TunifyDb2
                 );
             var app = builder.Build();
 
-            
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+            //Call swagger services
             app.UseSwagger(
              options =>
              {
@@ -42,7 +58,7 @@ namespace TunifyDb2
              }
              );
 
-            
+            //Call swagger UI
             app.UseSwaggerUI(options =>
             {
                 options.SwaggerEndpoint("/api/v1/swagger.json", "Tunify API v1");
@@ -51,7 +67,7 @@ namespace TunifyDb2
 
 
             app.MapControllers();
-          
+            //  app.MapGet("/", () => "Hello World!");
 
             app.Run();
         }
