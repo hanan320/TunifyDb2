@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TunifyDb2.Models;
 
 namespace TunifyDb2.Data
 {
-    public class TunifyDbContext:DbContext
+    public class TunifyDbContext : IdentityDbContext<ApplicationUser>
     {
         public TunifyDbContext(DbContextOptions options) : base(options)
         {
@@ -18,6 +19,7 @@ namespace TunifyDb2.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<PlaylistSongs>()
             .HasKey(ps => new { ps.Playlist_Id, ps.Song_Id });
 
