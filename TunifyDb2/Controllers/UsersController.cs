@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TunifyDb2.Data;
 using TunifyDb2.Models;
+using TunifyDb2.Repositories.Interfaces;
 
 namespace TunifyDb2.Controllers
 {
@@ -14,40 +15,34 @@ namespace TunifyDb2.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        private readonly TunifyDbContext _context;
+        private readonly IUser _user;
 
-        public UsersController(TunifyDbContext context)
+        public UsersController(IUser context)
         {
-            _context = context;
+            _user = context;
         }
 
         // GET: api/Users
+        [Route("/user/GetAllUsers")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> Getusers()
+        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-          if (_context.users == null)
-          {
-              return NotFound();
-          }
-            return await _context.users.ToListAsync();
+            return Ok(await _user.GetAllUsers());
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
-          if (_context.users == null)
-          {
-              return NotFound();
-          }
-            var user = await _context.users.FindAsync(id);
+            var user = await _user.GetUserById(id);
 
             if (user == null)
             {
-                return NotFound();
+                return NotFound($"User [{id}] not found.");
             }
 
-            return user;
+            return Ok(user);
+
         }
 
         // PUT: api/Users/5
@@ -55,30 +50,14 @@ namespace TunifyDb2.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, User user)
         {
-            if (id != user.UserId)
-            {
-                return BadRequest();
-            }
 
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
+            var updatedUser = await _user.UpdateUser(id, user);
+            //Check the user
+            if (updatedUser == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound($"User [{id}] not found.");
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            return Ok(updatedUser);
         }
 
         // POST: api/Users
@@ -86,39 +65,26 @@ namespace TunifyDb2.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
-          if (_context.users == null)
-          {
-              return Problem("Entity set 'TunifyDbContext.users'  is null.");
-          }
-            _context.users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            var newUser = await _user.CreateUser(user);
+            return Ok(newUser);
         }
+
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-            if (_context.users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.users.FindAsync(id);
+            //Check the user
+            var user = await _user.GetUserById(id);
             if (user == null)
             {
-                return NotFound();
+                return NotFound($"User [{id}] not found");
             }
 
-            _context.users.Remove(user);
-            await _context.SaveChangesAsync();
-
+            await _user.DeleteUser(id);
             return NoContent();
         }
 
-        private bool UserExists(int id)
-        {
-            return (_context.users?.Any(e => e.UserId == id)).GetValueOrDefault();
-        }
+      
     }
 }
