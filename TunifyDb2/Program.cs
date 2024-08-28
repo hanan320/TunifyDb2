@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using System;
 using TunifyDb2.Data;
 using TunifyDb2.Models;
@@ -30,7 +32,23 @@ namespace TunifyPlatform
             builder.Services.AddTransient<IPlayList, PlaylistsServices>();
             builder.Services.AddTransient<IArtists,ArtistsServices>();
 
+            builder.Services.AddScoped<JwtTokenService>();
+
             builder.Services.AddTransient<IAccounts, IdentityAccountService>();
+
+            builder.Services.AddAuthentication(
+                options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                }
+                ).AddJwtBearer(
+                    options =>
+                    {
+                        options.TokenValidationParameters = JwtTokenService.ValidateToken(builder.Configuration);
+                    }
+                );
 
 
             //swager configration 
@@ -42,6 +60,30 @@ namespace TunifyPlatform
                         Title = "Tunify API",
                         Version = "v1",
                         Description = "API for managing playlists, songs, and artists in the Tunify Platform"
+                    });
+                    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                    {
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        In = ParameterLocation.Header,
+                        Description = "Please enter user token below."
+                    });
+
+                    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            },
+                            Array.Empty<string>()
+                        }
                     });
                 }
                 );

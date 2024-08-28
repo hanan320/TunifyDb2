@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using TunifyDb2.Data;
 using TunifyDb2.Models;
 using TunifyDb2.Models.DTO;
+using TunifyDb2.Repositories.Services;
 using TunifyPlatform.Repositories.Interfaces;
 
 
@@ -15,11 +16,16 @@ namespace TunifyPlatform.Repositories.Services
     public class IdentityAccountService : IAccounts
     {
         private UserManager<ApplicationUser> _userManager;
+
+         
+        private JwtTokenService _jwtTokenService;
+
         private readonly SignInManager<ApplicationUser> _signInManager;
-        public IdentityAccountService(UserManager<ApplicationUser> Manager, SignInManager<ApplicationUser> signInManager)
+        public IdentityAccountService(UserManager<ApplicationUser> Manager, SignInManager<ApplicationUser> signInManager, JwtTokenService jwtTokenService)
         {
             _userManager = Manager;
             _signInManager = signInManager;
+            _jwtTokenService = jwtTokenService;
         }
         public async Task<AccountDto> Register(RegisterDto registerDto, ModelStateDictionary modleState)
         {
@@ -33,10 +39,12 @@ namespace TunifyPlatform.Repositories.Services
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRolesAsync(user, registerDto.Role);
                 return new AccountDto()
                 {
                     Id = user.Id,
-                    UserName = user.UserName
+                    UserName = user.UserName,
+                    Role = await _userManager.GetRolesAsync(user)
 
                 };
             }
@@ -62,7 +70,9 @@ namespace TunifyPlatform.Repositories.Services
                 return new AccountDto()
                 {
                     Id = user.Id,
-                    UserName = user.UserName
+                    UserName = user.UserName,
+                  
+                    Token = await _jwtTokenService.GenerateToken(user, System.TimeSpan.FromMinutes(8))
                 };
             }
             return null;
