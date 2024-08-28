@@ -9,5 +9,6 @@ namespace TunifyDb2.Repositories.Interfaces
         Task<List<Playlists>> GetAllPlaylists();
         Task<Playlists> UpdatePlaylists(int id, Playlists playlists);
         Task DeletePlaylists(int id);
+        Task AddSongToPlaylist(int playlistId, int songId);
     }
 }

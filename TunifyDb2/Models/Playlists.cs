@@ -6,5 +6,8 @@
         public int User_Id { get; set; }//FK
         public string Playlists_Name { get; set; }
         public string Created_Date { get; set; }
+
+        
+        public ICollection<PlaylistSongs> PlaylistSongs { get; set; }
     }
 }

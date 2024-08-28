@@ -57,5 +57,27 @@ namespace TunifyDb2.Repositories.Services
             await _context.SaveChangesAsync();
             return artist;
         }
+
+        public async Task AddSongToArtist(int artistId, int songId)
+        {
+            var artist = await _context.artists.FindAsync(artistId);
+            if (artist == null)
+            {
+                throw new KeyNotFoundException("Artist not found.");
+            }
+
+            var song = await _context.songs.FindAsync(songId);
+            if (song == null)
+            {
+                throw new KeyNotFoundException("Song not found.");
+            }
+
+            // Associate the song with the artist
+            song.ArtistId = artistId;
+            song.Artist = artist;
+
+            // Save the changes in the context
+            await _context.SaveChangesAsync();
+        }
     }
 }

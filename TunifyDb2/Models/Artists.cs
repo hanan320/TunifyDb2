@@ -5,5 +5,8 @@
         public int ArtistsId { get; set; }//PK
         public string Name { get; set; }
         public string Bio { get; set; }
+
+      
+        public ICollection<Songs> Songs { get; set; }
     }
 }

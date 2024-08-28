@@ -2,8 +2,11 @@
 {
     public class PlaylistSongs
     {
-        public int PlaylistSongsId { get; set; }//PK
         public int Playlist_Id { get; set; }//FK
+        public Playlists Playlist { get; set; }
+
+
         public int Song_Id { get; set; }//FK
+        public Songs Song { get; set; }
     }
 }

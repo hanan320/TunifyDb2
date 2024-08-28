@@ -82,7 +82,14 @@ namespace TunifyDb2.Controllers
             await _playList.DeletePlaylists(id);
             return NoContent();
         }
+        [HttpPost]
+        [Route("playlists/{playlistId}/songs/{songId}")]
+        public async Task<IActionResult> AddSongToPlaylist(int playlistId, int songId)
+        {
+            await _playList.AddSongToPlaylist(playlistId, songId);
+            return Ok();
+        }
 
-        
+
     }
 }
