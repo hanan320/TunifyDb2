@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TunifyDb2.Models;
 
@@ -64,8 +65,39 @@ namespace TunifyDb2.Data
                 new PlaylistSongs { Playlist_Id = 1, Song_Id = 1 },
                 new PlaylistSongs { Playlist_Id = 2, Song_Id = 3 },
                 new PlaylistSongs { Playlist_Id = 3, Song_Id = 2 }
-                );
+            );
+
+            seedRole(modelBuilder, "Admin");
+            seedRole(modelBuilder, "User");
+
 
         }
+        private void seedRole(ModelBuilder modelBuilder, string roleName, params string[] permissions)
+        {
+            
+            var role = new IdentityRole
+            {
+                Id = roleName.ToLower(),
+                Name = roleName,
+                NormalizedName = roleName.ToUpper(),
+                ConcurrencyStamp = Guid.NewGuid().ToString()
+            };
+
+            modelBuilder.Entity<IdentityRole>().HasData(role);
+
+           
+            if (permissions != null && permissions.Length > 0)
+            {
+                var roleClaims = permissions.Select(permission => new IdentityRoleClaim<string>
+                {
+                    RoleId = role.Id,
+                    ClaimType = "Permission",
+                    ClaimValue = permission
+                }).ToArray();
+
+                modelBuilder.Entity<IdentityRoleClaim<string>>().HasData(roleClaims);
+            }
+        }
+
     }
 }

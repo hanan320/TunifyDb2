@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using TunifyDb2.Repositories.Interfaces;
 
 namespace TunifyDb2.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -69,7 +71,6 @@ namespace TunifyDb2.Controllers
             return Ok(newUser);
         }
 
-
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
@@ -85,6 +86,5 @@ namespace TunifyDb2.Controllers
             return NoContent();
         }
 
-      
     }
 }

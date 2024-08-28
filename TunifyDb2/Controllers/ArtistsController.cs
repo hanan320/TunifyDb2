@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using TunifyDb2.Repositories.Interfaces;
 
 namespace TunifyDb2.Controllers
 {
+    [Authorize(Roles = "Admin,User")]
     [Route("api/[controller]")]
     [ApiController]
     public class ArtistsController : ControllerBase
@@ -83,6 +85,7 @@ namespace TunifyDb2.Controllers
             await _artists.DeleteArtists(id);
             return NoContent();
         }
+
         // POST: api/Artists/{artistId}/Songs/{songId}
         [HttpPost("{artistId}/Songs/{songId}")]
         public async Task<IActionResult> AddSongToArtist(int artistId, int songId)
